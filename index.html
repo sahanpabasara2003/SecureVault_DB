@@ -1,57 +1,116 @@
-function doGet(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var email = e.parameter.email;
-  var results = { passwords: [], notes: [], diary: [] };
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault Pro | Cloud Integrated</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
 
-  try {
-    // දත්ත ලබාගන්නා පොදු function එක
-    function getTabData(sheetName) {
-      var sheet = ss.getSheetByName(sheetName);
-      if (!sheet) return [];
-      var data = sheet.getDataRange().getValues();
-      var filtered = [];
-      for (var i = 1; i < data.length; i++) {
-        if (data[i][0] == email) {
-          filtered.push({ row: i + 1, values: data[i] });
-        }
-      }
-      return filtered;
+<div id="main-app" class="flex h-screen">
+    <aside class="w-64 glass p-6 flex flex-col gap-8">
+        <h1 class="text-xl font-bold text-blue-500">SecureVault Pro</h1>
+        <nav class="flex flex-col gap-2">
+            <button onclick="showTab('passwords')" class="p-3 rounded-xl hover:bg-blue-600 transition text-left flex gap-3"><i data-lucide="key"></i> Passwords</button>
+            <button onclick="showTab('notes')" class="p-3 rounded-xl hover:bg-blue-600 transition text-left flex gap-3"><i data-lucide="file-text"></i> Notes</button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-10 overflow-y-auto">
+        <div id="tab-passwords" class="tab-content active">
+            <h2 class="text-3xl font-bold mb-6">Password Manager</h2>
+            <div class="glass p-6 rounded-2xl mb-8 grid grid-cols-4 gap-4">
+                <input id="p-plat" placeholder="Platform" class="bg-slate-900 p-3 rounded-lg outline-none">
+                <input id="p-user" placeholder="Username" class="bg-slate-900 p-3 rounded-lg outline-none">
+                <input id="p-pass" type="password" placeholder="Password" class="bg-slate-900 p-3 rounded-lg outline-none">
+                <button onclick="save('passwords')" class="bg-blue-600 rounded-lg font-bold">Save</button>
+            </div>
+            <div id="password-display" class="grid grid-cols-3 gap-4"></div>
+        </div>
+
+        <div id="tab-notes" class="tab-content">
+            <h2 class="text-3xl font-bold mb-6">Notepad</h2>
+            <div class="glass p-6 rounded-2xl mb-8">
+                <input id="n-title" placeholder="Title" class="w-full bg-slate-900 p-3 rounded-lg mb-4 outline-none">
+                <textarea id="n-body" placeholder="Write here..." class="w-full bg-slate-900 p-3 rounded-lg h-32 outline-none"></textarea>
+                <button onclick="save('notes')" class="mt-4 bg-emerald-600 px-8 py-3 rounded-lg font-bold">Save Note</button>
+            </div>
+            <div id="notes-display" class="grid grid-cols-2 gap-4"></div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const SCRIPT_URL = "ඔබේ_අලුත්ම_URL_එක_මෙහි_යොදන්න";
+    const USER_EMAIL = "sahanpabasara2003@gmail.com"; // පරීක්ෂා කිරීම සඳහා
+
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        fetchData();
     }
 
-    results.passwords = getTabData("Passwords").map(item => ({
-      id: item.row, platform: item.values[1], user: item.values[2], pass: item.values[3], url: item.values[4]
-    }));
+    async function fetchData() {
+        const res = await fetch(`${SCRIPT_URL}?email=${USER_EMAIL}`);
+        const data = await res.json();
+        
+        // Render Passwords
+        document.getElementById('password-display').innerHTML = data.passwords.map(p => `
+            <div class="glass p-5 rounded-xl relative group">
+                <button onclick="deleteItem('Passwords', ${p.id})" class="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" size="16"></i></button>
+                <h4 class="font-bold text-blue-400">${p.platform}</h4>
+                <p class="text-sm text-slate-400">${p.user}</p>
+                <p class="font-mono mt-2">••••••••</p>
+            </div>
+        `).join('');
 
-    results.notes = getTabData("Notes").map(item => ({
-      id: item.row, title: item.values[1], content: item.values[2], time: item.values[3]
-    }));
+        // Render Notes
+        document.getElementById('notes-display').innerHTML = data.notes.map(n => `
+            <div class="glass p-5 rounded-xl border-l-4 border-emerald-500">
+                <h4 class="font-bold">${n.title}</h4>
+                <p class="text-sm text-slate-300 mt-2">${n.content}</p>
+                <button onclick="deleteItem('Notes', ${n.id})" class="text-xs text-red-400 mt-4">Delete</button>
+            </div>
+        `).join('');
+        lucide.createIcons();
+    }
 
-    results.diary = getTabData("Diary").map(item => ({
-      id: item.row, date: item.values[1], mood: item.values[2], content: item.values[3]
-    }));
+    async function save(type) {
+        let payload = type === 'passwords' ? 
+            { p: document.getElementById('p-plat').value, u: document.getElementById('p-user').value, ps: document.getElementById('p-pass').value, url: "" } :
+            { t: document.getElementById('n-title').value, c: document.getElementById('n-body').value, time: new Date().toLocaleDateString() };
 
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-  return ContentService.createTextOutput(JSON.stringify(results)).setMimeType(ContentService.MimeType.JSON);
-}
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'save_data', email: USER_EMAIL, dataType: type, payload })
+        });
+        Swal.fire('Saved!', '', 'success');
+        setTimeout(fetchData, 2000);
+    }
 
-function doPost(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var data = JSON.parse(e.postData.contents);
+    async function deleteItem(tab, id) {
+        if(!confirm("මකා දැමීමට අවශ්‍යද?")) return;
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'delete_data', tab: tab, rowId: id })
+        });
+        fetchData();
+    }
 
-  if (data.action === 'save_data') {
-    var sheet = ss.getSheetByName(data.dataType === 'passwords' ? "Passwords" : (data.dataType === 'notes' ? "Notes" : "Diary"));
-    var row = [data.email];
-    Object.values(data.payload).forEach(val => row.push(val));
-    sheet.appendRow(row);
-    return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  // දත්ත මැකීම (Delete) සඳහා
-  if (data.action === 'delete_data') {
-    var sheet = ss.getSheetByName(data.tab);
-    sheet.deleteRow(data.rowId);
-    return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
+    fetchData(); // මුලින්ම දත්ත Load කිරීමට
+    lucide.createIcons();
+</script>
+</body>
+</html>
