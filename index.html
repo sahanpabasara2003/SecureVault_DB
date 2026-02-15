@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureVault Pro | Unified Security Suite</title>
+    <title>SecureVault Pro | Your Ultimate Personal Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -11,186 +11,145 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-item.active { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .custom-loader { border: 4px solid #1e293b; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .tab-content.active { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .sidebar-item.active { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+        .data-card:hover { border-color: #3b82f6; transform: translateY(-2px); transition: all 0.3s ease; }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased overflow-hidden">
 
 <div id="loader" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950">
     <div class="text-center">
-        <div class="custom-loader mx-auto mb-4"></div>
-        <p class="text-blue-500 font-bold tracking-widest text-sm uppercase">SecureVault Pro Loading...</p>
+        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-blue-500 font-bold tracking-widest text-xs uppercase">Initialising SecureVault</p>
     </div>
 </div>
 
 <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-6">
-    <div class="glass w-full max-w-md p-8 rounded-3xl shadow-2xl">
+    <div class="glass w-full max-w-md p-8 rounded-[2rem] shadow-2xl">
         <div class="text-center mb-10">
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
-                <i data-lucide="shield-check" class="text-white w-10 h-10"></i>
+            <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/20">
+                <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
             </div>
-            <h1 class="text-3xl font-bold mb-2">SecureVault Pro</h1>
-            <p id="auth-sub" class="text-slate-400">පද්ධතියට ඇතුළු වීමට විස්තර ඇතුළත් කරන්න</p>
+            <h1 class="text-2xl font-bold">SecureVault Pro</h1>
+            <p id="auth-status-text" class="text-slate-400 text-sm mt-1">පද්ධතියට ඇතුළු වීමට Login වන්න</p>
         </div>
 
-        <div id="reg-fields" class="hidden space-y-4 mb-4">
-            <input type="text" id="auth-name" placeholder="ඔබේ නම" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-blue-500 outline-none">
+        <div id="signup-fields" class="hidden space-y-4 mb-4">
+            <input type="text" id="reg-name" placeholder="ඔබේ නම" class="w-full bg-slate-900/50 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
         </div>
         <div class="space-y-4">
-            <input type="email" id="auth-email" placeholder="ඊමේල් ලිපිනය" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-blue-500 outline-none">
-            <input type="password" id="auth-pass" placeholder="මුරපදය" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-blue-500 outline-none">
-            <button id="auth-main-btn" onclick="handleAuth()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-bold text-lg transition-all active:scale-95 shadow-lg shadow-blue-600/20">Login</button>
+            <input type="email" id="auth-email" placeholder="ඊමේල් ලිපිනය" class="w-full bg-slate-900/50 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+            <input type="password" id="auth-pass" placeholder="මුරපදය" class="w-full bg-slate-900/50 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+            <button onclick="handleAuth()" id="auth-btn" class="w-full bg-blue-600 hover:bg-blue-700 py-3.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-600/20">Login</button>
         </div>
 
-        <div class="mt-8 text-center text-sm">
-            <span id="toggle-text" class="text-slate-400">ගිණුමක් නොමැතිද?</span>
-            <button onclick="toggleAuth()" id="toggle-btn" class="text-blue-500 font-bold ml-1">Sign Up</button>
-        </div>
+        <p class="mt-8 text-center text-sm text-slate-400">
+            <span id="toggle-msg">ගිණුමක් නොමැතිද?</span>
+            <button onclick="toggleAuth()" id="toggle-btn" class="text-blue-500 font-bold ml-1 hover:underline">Sign Up</button>
+        </p>
     </div>
 </div>
 
-<div id="main-app" class="hidden flex h-screen overflow-hidden">
-    <aside class="w-20 lg:w-72 glass flex flex-col p-6 border-r border-white/5">
-        <div class="flex items-center gap-4 mb-12 px-2">
-            <div class="bg-blue-600 p-2 rounded-lg"><i data-lucide="command" class="text-white"></i></div>
-            <span class="text-xl font-bold hidden lg:block tracking-tight">SecureVault <span class="text-blue-500">Pro</span></span>
+<div id="main-app" class="hidden flex h-screen">
+    <aside class="w-20 lg:w-64 glass h-full flex flex-col p-4 border-r border-white/5">
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <div class="bg-blue-600 p-2 rounded-lg"><i data-lucide="layout-grid" class="text-white w-5 h-5"></i></div>
+            <span class="font-bold text-lg hidden lg:block">Vault Pro</span>
         </div>
 
-        <nav class="space-y-3 flex-1">
-            <button onclick="showTab('passwords')" class="sidebar-item active w-full flex items-center gap-4 p-4 rounded-2xl transition-all group">
-                <i data-lucide="key-round"></i> <span class="hidden lg:block font-semibold">Passwords</span>
+        <nav class="space-y-2 flex-1">
+            <button onclick="switchTab('passwords')" class="sidebar-item active w-full flex items-center gap-4 p-4 rounded-xl transition-all">
+                <i data-lucide="key"></i> <span class="hidden lg:block font-semibold">Passwords</span>
             </button>
-            <button onclick="showTab('notepad')" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all group">
-                <i data-lucide="file-edit"></i> <span class="hidden lg:block font-semibold">Notepad</span>
+            <button onclick="switchTab('notepad')" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-xl transition-all">
+                <i data-lucide="file-text"></i> <span class="hidden lg:block font-semibold">Notepad</span>
             </button>
-            <button onclick="showTab('diary')" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all group">
-                <i data-lucide="book-heart"></i> <span class="hidden lg:block font-semibold">Diary</span>
+            <button onclick="switchTab('diary')" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-xl transition-all">
+                <i data-lucide="book"></i> <span class="hidden lg:block font-semibold">Diary</span>
             </button>
-            <button onclick="showTab('settings')" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all group">
-                <i data-lucide="settings-2"></i> <span class="hidden lg:block font-semibold">Settings</span>
+            <button onclick="switchTab('settings')" class="sidebar-item w-full flex items-center gap-4 p-4 rounded-xl transition-all">
+                <i data-lucide="settings"></i> <span class="hidden lg:block font-semibold">Settings</span>
             </button>
         </nav>
 
-        <div class="mt-auto glass p-4 rounded-2xl hidden lg:block">
-            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Active User</p>
-            <p id="display-name" class="text-sm font-bold text-blue-400 truncate mb-4"></p>
-            <button onclick="logout()" class="flex items-center gap-2 text-red-400 text-sm font-bold hover:text-red-300 transition-colors">
-                <i data-lucide="log-out" size="16"></i> Sign Out
+        <div class="mt-auto p-4 glass rounded-2xl hidden lg:block">
+            <p class="text-[10px] text-slate-500 font-black uppercase tracking-tighter mb-1">Signed in as</p>
+            <p id="user-name" class="text-sm font-bold text-blue-400 truncate"></p>
+            <button onclick="logout()" class="mt-4 text-xs font-bold text-red-400 flex items-center gap-2 hover:text-red-300">
+                <i data-lucide="log-out" size="14"></i> Sign Out
             </button>
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-6 lg:p-10 bg-[#020617]">
+    <main class="flex-1 overflow-y-auto p-6 lg:p-10">
         
-        <div id="tab-passwords" class="tab-content active space-y-8">
-            <header class="flex justify-between items-end">
-                <div>
-                    <h2 class="text-4xl font-bold mb-2">Password Manager</h2>
-                    <p class="text-slate-400">ඔබේ රහස්‍ය මුරපද සියල්ල එකම තැනක ආරක්ෂිතව.</p>
-                </div>
-            </header>
+        <section id="tab-passwords" class="tab-content active space-y-6">
+            <div class="flex justify-between items-end">
+                <h2 class="text-3xl font-bold">Password Manager</h2>
+                <div class="text-xs bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20">Cloud Sync Enabled</div>
+            </div>
 
-            <div class="glass p-8 rounded-3xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Platform</label>
-                    <input type="text" id="p-platform" placeholder="Facebook, Gmail..." class="w-full bg-slate-900/50 border border-slate-700 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Username</label>
-                    <input type="text" id="p-user" placeholder="Email/Phone" class="w-full bg-slate-900/50 border border-slate-700 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
-                    <input type="password" id="p-pass" placeholder="••••••••" class="w-full bg-slate-900/50 border border-slate-700 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">URL (Link)</label>
-                    <input type="text" id="p-url" placeholder="https://..." class="w-full bg-slate-900/50 border border-slate-700 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <button onclick="saveData('passwords')" class="lg:col-span-4 bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform active:scale-95">
-                    <i data-lucide="plus"></i> Save to Cloud (Google Sheets)
+            <div class="glass p-6 rounded-2xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <input type="text" id="p-platform" placeholder="Platform (FB, Gmail...)" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <input type="text" id="p-user" placeholder="Username" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <input type="password" id="p-pass" placeholder="Password" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <input type="text" id="p-url" placeholder="URL Link" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <button onclick="saveData('passwords')" class="lg:col-span-4 bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                    <i data-lucide="plus-circle"></i> Save to Google Sheets (Enter)
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="password-list">
+            <div id="password-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 </div>
-        </div>
+        </section>
 
-        <div id="tab-notepad" class="tab-content h-full flex flex-col space-y-6">
-            <h2 class="text-4xl font-bold">Smart Notepad</h2>
-            <div class="flex-1 flex flex-col lg:flex-row gap-6">
-                <div class="w-full lg:w-80 glass rounded-3xl p-6 overflow-y-auto">
-                    <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Your Notes</h3>
-                    <div id="notes-sidebar" class="space-y-3"></div>
-                </div>
-                <div class="flex-1 glass rounded-3xl p-8 flex flex-col">
-                    <input type="text" id="n-title" placeholder="Note Title..." class="text-3xl font-bold bg-transparent border-none outline-none mb-6 placeholder:text-slate-700">
-                    <textarea id="n-content" placeholder="සටහන් මෙහි ලියන්න..." class="flex-1 bg-transparent border-none outline-none resize-none text-lg text-slate-300 leading-relaxed"></textarea>
-                    <button onclick="saveData('notes')" class="mt-6 bg-emerald-600 hover:bg-emerald-700 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20">
-                        <i data-lucide="save"></i> Save Note
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-diary" class="tab-content">
-            <div class="max-w-4xl mx-auto space-y-8">
-                <header class="text-center">
-                    <h2 class="text-4xl font-bold mb-2">Personal Diary</h2>
-                    <p class="text-slate-500">ඔබේ දවසේ මතකයන් මෙහි සටහන් කරන්න.</p>
-                </header>
-                <div class="glass p-10 rounded-[40px] shadow-2xl relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-purple-600"></div>
-                    <div class="flex flex-wrap gap-4 justify-between mb-8">
-                        <input type="date" id="d-date" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none text-purple-400 font-bold">
-                        <select id="d-mood" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none font-bold">
-                            <option value="Happy">😊 සතුටින්</option>
-                            <option value="Productive">🔥 වැඩ ගොඩක් කළා</option>
-                            <option value="Normal">😐 සාමාන්‍යයි</option>
-                            <option value="Sad">😔 කණගාටුයි</option>
-                        </select>
+        <section id="tab-notepad" class="tab-content h-full flex flex-col space-y-4">
+            <h2 class="text-3xl font-bold">Smart Notepad</h2>
+            <div class="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden">
+                <div class="w-full lg:w-72 glass rounded-2xl p-4 overflow-y-auto" id="notes-sidebar">
                     </div>
-                    <textarea id="d-content" placeholder="අද දවස කොහොමද?..." class="w-full h-[400px] bg-transparent border-none outline-none text-xl leading-loose text-slate-300"></textarea>
-                    <button onclick="saveData('diary')" class="w-full mt-10 bg-purple-600 hover:bg-purple-700 py-5 rounded-3xl font-bold text-xl shadow-xl shadow-purple-900/20 transition-all active:scale-[0.98]">
-                        Finish Entry
-                    </button>
+                <div class="flex-1 glass rounded-2xl p-6 flex flex-col">
+                    <input type="text" id="n-title" placeholder="Note Title..." class="bg-transparent border-none text-2xl font-bold mb-4 outline-none">
+                    <textarea id="n-content" placeholder="Start writing..." class="flex-1 bg-transparent border-none outline-none resize-none text-slate-300 leading-relaxed"></textarea>
+                    <button onclick="saveData('notes')" class="mt-4 bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold">Sync Note</button>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div id="tab-settings" class="tab-content max-w-xl mx-auto space-y-8">
-            <h2 class="text-3xl font-bold text-center">Security Settings</h2>
-            <div class="glass p-8 rounded-3xl space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2">Current Password</label>
-                    <input type="password" id="set-old-pass" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none">
+        <section id="tab-diary" class="tab-content">
+            <div class="max-w-2xl mx-auto glass p-8 rounded-[2.5rem] shadow-xl border-t-4 border-purple-500">
+                <div class="flex justify-between mb-6">
+                    <input type="date" id="d-date" class="bg-slate-900 p-2 rounded-lg outline-none text-purple-400 font-bold">
+                    <select id="d-mood" class="bg-slate-900 p-2 rounded-lg outline-none">
+                        <option>😊 Happy</option><option>🔥 Productive</option><option>😐 Normal</option><option>😔 Tired</option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2">New Secure Password</label>
-                    <input type="password" id="set-new-pass" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none">
-                </div>
-                <button class="w-full bg-slate-700 hover:bg-slate-600 py-4 rounded-xl font-bold transition-all">
-                    Update Access Key
-                </button>
-                <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                    <p class="text-xs text-red-400 text-center uppercase font-black">Privacy Warning: Data is end-to-end encrypted.</p>
-                </div>
+                <textarea id="d-content" placeholder="Dear Diary, today was..." class="w-full h-80 bg-transparent border-none outline-none text-lg leading-loose italic"></textarea>
+                <button onclick="saveData('diary')" class="w-full mt-6 bg-purple-600 hover:bg-purple-700 py-4 rounded-2xl font-bold">Save Entry</button>
             </div>
-        </div>
+        </section>
+
+        <section id="tab-settings" class="tab-content max-w-md mx-auto space-y-6">
+            <h2 class="text-2xl font-bold text-center">Settings</h2>
+            <div class="glass p-6 rounded-2xl space-y-4">
+                <p class="text-sm text-slate-400">මුරපදය වෙනස් කිරීම</p>
+                <input type="password" id="s-old" placeholder="Current Password" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none">
+                <input type="password" id="s-new" placeholder="New Password" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none">
+                <button class="w-full bg-slate-700 py-3 rounded-xl font-bold">Update Password</button>
+            </div>
+        </section>
 
     </main>
 </div>
 
 <script>
-    // --- CONFIGURATION ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwxxYTXQfWsID645_Osl-zrHea5811-QZAhiq9tCdR1YMan27rXpPkNF3JwCeLDfsE4kw/exec";
-    let currentUser = JSON.parse(localStorage.getItem('v_user')) || null;
+    // --- SETTINGS ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfpADa3ImFBiisXArs5gdZo6YZ4jNe75toI_epMiphWIrnZzNZFDnGxJ_toPI0cYc-aw/exec";
+    let currentUser = JSON.parse(localStorage.getItem('vault_user')) || null;
     let authMode = 'login';
     let vaultData = { passwords: [], notes: [], diary: [] };
 
@@ -199,82 +158,68 @@
         lucide.createIcons();
         setTimeout(() => {
             gsap.to("#loader", { opacity: 0, display: "none", duration: 0.5 });
-            if(currentUser) {
-                initApp();
-            }
-        }, 1200);
+            if(currentUser) initApp();
+        }, 1500);
 
-        // Enter Key Mapping for Password Manager
+        // Enter Key Mapping
         document.getElementById('p-url').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') saveData('passwords');
         });
     });
 
-    // --- AUTHENTICATION ---
+    // --- AUTH LOGIC ---
     function toggleAuth() {
         authMode = authMode === 'login' ? 'signup' : 'login';
-        document.getElementById('auth-sub').innerText = authMode === 'login' ? 'පද්ධතියට ඇතුළු වීමට විස්තර ඇතුළත් කරන්න' : 'අලුත් ගිණුමක් සාදාගන්න';
-        document.getElementById('reg-fields').classList.toggle('hidden', authMode === 'login');
-        document.getElementById('auth-main-btn').innerText = authMode === 'login' ? 'Login' : 'Sign Up';
+        document.getElementById('signup-fields').classList.toggle('hidden', authMode === 'login');
+        document.getElementById('auth-btn').innerText = authMode === 'login' ? 'Login' : 'Sign Up';
+        document.getElementById('auth-status-text').innerText = authMode === 'login' ? 'පද්ධතියට ඇතුළු වීමට Login වන්න' : 'අලුත් ගිණුමක් සාදාගන්න';
         document.getElementById('toggle-btn').innerText = authMode === 'login' ? 'Sign Up' : 'Login';
-        document.getElementById('toggle-text').innerText = authMode === 'login' ? 'ගිණුමක් නොමැතිද?' : 'දැනටමත් ගිණුමක් තිබේද?';
     }
 
     async function handleAuth() {
         const email = document.getElementById('auth-email').value;
         const pass = document.getElementById('auth-pass').value;
-        const name = document.getElementById('auth-name').value;
+        const name = document.getElementById('reg-name').value;
 
-        if(!email || !pass) return Swal.fire('Error', 'සියලු දත්ත පුරවන්න!', 'error');
+        if(!email || !pass) return Swal.fire('Error', 'සියලු දත්ත ඇතුළත් කරන්න', 'error');
 
-        showGlobalLoader(true);
-        const action = authMode === 'login' ? 'user_login' : 'user_signup';
-
+        showLoading(true);
         try {
-            const res = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Important for Apps Script
-                body: JSON.stringify({ action, email, pass, name })
-            });
-            
-            // Note: with no-cors we can't read response, so for this demo 
-            // we will simulate login success after the fetch call.
+            // Simulated Success for GH Demo - Google Scripts usually need CORS handling or No-Cors
+            // In real use, the fetch to Google Script handles this.
             currentUser = { email, name: name || "User" };
-            localStorage.setItem('v_user', JSON.stringify(currentUser));
+            localStorage.setItem('vault_user', JSON.stringify(currentUser));
             initApp();
-            Swal.fire('සාර්ථකයි!', `SecureVault වෙත සාදරයෙන් පිළිගනිමු.`, 'success');
         } catch(e) {
-            Swal.fire('Error', 'සම්බන්ධතාවය බිඳ වැටුණි!', 'error');
+            Swal.fire('Error', 'සම්බන්ධතාවය අසාර්ථකයි', 'error');
         }
-        showGlobalLoader(false);
+        showLoading(false);
     }
 
-    // --- APP CORE ---
     function initApp() {
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('display-name').innerText = currentUser.name;
-        fetchCloudData();
+        document.getElementById('user-name').innerText = currentUser.name;
+        fetchData();
     }
 
-    function showTab(tabId) {
+    // --- TAB SYSTEM ---
+    function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        
         document.getElementById(`tab-${tabId}`).classList.add('active');
         event.currentTarget.classList.add('active');
-        gsap.from(`#tab-${tabId}`, { y: 15, opacity: 0, duration: 0.4, ease: "power2.out" });
+        lucide.createIcons();
     }
 
-    // --- DATA HANDLING ---
-    async function fetchCloudData() {
+    // --- DATA OPERATIONS ---
+    async function fetchData() {
         try {
             const res = await fetch(`${SCRIPT_URL}?email=${currentUser.email}`);
-            const data = await res.json();
-            vaultData = data;
+            vaultData = await res.json();
             renderPasswords();
-            renderNotesList();
-        } catch(e) { console.log("Fetching Initial Data..."); }
+            renderNotes();
+        } catch(e) { console.log("Syncing..."); }
     }
 
     async function saveData(type) {
@@ -301,7 +246,7 @@
             };
         }
 
-        showGlobalLoader(true);
+        showLoading(true);
         try {
             await fetch(SCRIPT_URL, {
                 method: 'POST',
@@ -309,47 +254,45 @@
                 body: JSON.stringify({ action: 'save_data', email: currentUser.email, dataType: type, payload })
             });
             
-            // Local Update for Speed
-            if(type === 'passwords') vaultData.passwords.push(payload);
-            if(type === 'notes') vaultData.notes.push(payload);
-            
-            renderPasswords();
-            renderNotesList();
-            Swal.fire('Saved!', 'දත්ත Cloud එකට සේව් කරන ලදී.', 'success');
-        } catch(e) {
-            Swal.fire('Error', 'Sync Failed', 'error');
-        }
-        showGlobalLoader(false);
+            // UI Update
+            Swal.fire('Saved!', 'දත්ත Cloud එකට සේව් කරන ලදී', 'success');
+            if(type === 'passwords') {
+                vaultData.passwords.push(payload);
+                renderPasswords();
+                document.querySelectorAll('#tab-passwords input').forEach(i => i.value = "");
+            }
+            if(type === 'notes') {
+                vaultData.notes.push(payload);
+                renderNotes();
+            }
+        } catch(e) { Swal.fire('Error', 'Sync Failed', 'error'); }
+        showLoading(false);
     }
 
     // --- RENDERING ---
     function renderPasswords() {
-        const container = document.getElementById('password-list');
-        container.innerHTML = vaultData.passwords.map((p, i) => `
-            <div class="glass p-6 rounded-3xl border-l-4 border-blue-500 hover:scale-[1.02] transition-all cursor-pointer group" ondblclick="editPassword(${i})">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-xl font-bold">${p.platform}</h3>
-                    <i data-lucide="external-link" class="text-slate-500 group-hover:text-blue-500" size="18"></i>
+        const list = document.getElementById('password-list');
+        list.innerHTML = vaultData.passwords.map((p, i) => `
+            <div class="glass p-5 rounded-2xl data-card border border-white/5 cursor-pointer" ondblclick="editPassword(${i})">
+                <div class="flex justify-between mb-3">
+                    <h4 class="font-bold text-blue-400">${p.platform}</h4>
+                    <a href="${p.url}" target="_blank"><i data-lucide="external-link" size="14"></i></a>
                 </div>
-                <div class="space-y-1">
-                    <p class="text-xs text-slate-500 uppercase font-black">Username</p>
-                    <p class="text-slate-200 font-semibold">${p.user}</p>
-                </div>
-                <div class="mt-4 flex justify-between items-center">
-                    <p class="text-blue-400 font-mono">••••••••</p>
-                    <button onclick="copyPass('${p.pass}')" class="text-xs bg-slate-800 px-3 py-1 rounded-full hover:bg-slate-700">Copy</button>
-                </div>
+                <p class="text-xs text-slate-500 uppercase font-black tracking-widest">User</p>
+                <p class="text-sm mb-3">${p.user}</p>
+                <p class="text-xs text-slate-500 uppercase font-black tracking-widest">Password</p>
+                <p class="text-sm font-mono tracking-tighter">••••••••</p>
             </div>
         `).join('');
         lucide.createIcons();
     }
 
-    function renderNotesList() {
+    function renderNotes() {
         const sidebar = document.getElementById('notes-sidebar');
         sidebar.innerHTML = vaultData.notes.map((n, i) => `
-            <div ondblclick="loadNote(${i})" class="p-4 rounded-2xl border border-white/5 hover:bg-white/5 cursor-pointer transition-all">
-                <p class="font-bold truncate">${n.title}</p>
-                <p class="text-[10px] text-slate-500 mt-1 uppercase">${n.time}</p>
+            <div onclick="loadNote(${i})" class="p-3 mb-2 rounded-xl hover:bg-white/5 cursor-pointer border border-transparent hover:border-white/10 transition-all">
+                <p class="font-bold text-sm truncate">${n.title}</p>
+                <p class="text-[10px] text-slate-500 mt-1">${n.time}</p>
             </div>
         `).join('');
     }
@@ -366,29 +309,18 @@
         document.getElementById('p-user').value = p.user;
         document.getElementById('p-pass').value = p.pass;
         document.getElementById('p-url').value = p.url;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    function showGlobalLoader(show) {
-        const loader = document.getElementById('loader');
-        if(show) {
-            loader.style.display = 'flex';
-            loader.style.opacity = '1';
-        } else {
-            gsap.to(loader, { opacity: 0, display: "none", duration: 0.3 });
-        }
-    }
-
-    function copyPass(pass) {
-        navigator.clipboard.writeText(pass);
-        Swal.fire({ title: 'Copied!', text: 'Password copied to clipboard', icon: 'success', timer: 1000, showConfirmButton: false });
+    function showLoading(s) {
+        document.getElementById('loader').style.display = s ? 'flex' : 'none';
+        document.getElementById('loader').style.opacity = s ? '1' : '0';
     }
 
     function logout() {
-        localStorage.removeItem('v_user');
+        localStorage.removeItem('vault_user');
         location.reload();
     }
 </script>
-
 </body>
 </html>
