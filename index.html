@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureVault Pro | Cloud Integrated</title>
+    <title>SecureVault Pro | Cloud Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -11,78 +11,86 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: white; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body>
+<body class="antialiased h-screen flex overflow-hidden">
 
-<div id="main-app" class="flex h-screen">
-    <aside class="w-64 glass p-6 flex flex-col gap-8">
-        <h1 class="text-xl font-bold text-blue-500">SecureVault Pro</h1>
+    <aside class="w-64 glass border-r border-white/5 p-6 flex flex-col gap-8">
+        <h1 class="text-2xl font-bold text-blue-500">SecureVault Pro</h1>
         <nav class="flex flex-col gap-2">
-            <button onclick="showTab('passwords')" class="p-3 rounded-xl hover:bg-blue-600 transition text-left flex gap-3"><i data-lucide="key"></i> Passwords</button>
-            <button onclick="showTab('notes')" class="p-3 rounded-xl hover:bg-blue-600 transition text-left flex gap-3"><i data-lucide="file-text"></i> Notes</button>
+            <button onclick="switchTab('passwords')" class="p-3 rounded-xl hover:bg-blue-600/20 text-left flex gap-3 transition"><i data-lucide="key"></i> Passwords</button>
+            <button onclick="switchTab('notes')" class="p-3 rounded-xl hover:bg-blue-600/20 text-left flex gap-3 transition"><i data-lucide="file-text"></i> Notes</button>
+            <button onclick="logout()" class="p-3 rounded-xl hover:bg-red-600/20 text-left flex gap-3 transition text-red-400 mt-auto"><i data-lucide="log-out"></i> Sign Out</button>
         </nav>
     </aside>
 
-    <main class="flex-1 p-10 overflow-y-auto">
+    <main class="flex-1 p-10 overflow-y-auto bg-[#020617]">
+        
         <div id="tab-passwords" class="tab-content active">
-            <h2 class="text-3xl font-bold mb-6">Password Manager</h2>
-            <div class="glass p-6 rounded-2xl mb-8 grid grid-cols-4 gap-4">
-                <input id="p-plat" placeholder="Platform" class="bg-slate-900 p-3 rounded-lg outline-none">
-                <input id="p-user" placeholder="Username" class="bg-slate-900 p-3 rounded-lg outline-none">
-                <input id="p-pass" type="password" placeholder="Password" class="bg-slate-900 p-3 rounded-lg outline-none">
-                <button onclick="save('passwords')" class="bg-blue-600 rounded-lg font-bold">Save</button>
+            <h2 class="text-3xl font-bold mb-8">Password Manager</h2>
+            <div class="glass p-6 rounded-2xl mb-10 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input id="p-plat" placeholder="Platform" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <input id="p-user" placeholder="Username" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <input id="p-pass" type="password" placeholder="Password" class="bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <button onclick="save('passwords')" class="bg-blue-600 hover:bg-blue-700 p-3 rounded-xl font-bold transition">Save to Cloud</button>
             </div>
-            <div id="password-display" class="grid grid-cols-3 gap-4"></div>
+            <div id="password-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
 
         <div id="tab-notes" class="tab-content">
-            <h2 class="text-3xl font-bold mb-6">Notepad</h2>
-            <div class="glass p-6 rounded-2xl mb-8">
-                <input id="n-title" placeholder="Title" class="w-full bg-slate-900 p-3 rounded-lg mb-4 outline-none">
-                <textarea id="n-body" placeholder="Write here..." class="w-full bg-slate-900 p-3 rounded-lg h-32 outline-none"></textarea>
-                <button onclick="save('notes')" class="mt-4 bg-emerald-600 px-8 py-3 rounded-lg font-bold">Save Note</button>
+            <h2 class="text-3xl font-bold mb-8">Notepad</h2>
+            <div class="glass p-6 rounded-2xl mb-10 space-y-4">
+                <input id="n-title" placeholder="Title" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                <textarea id="n-body" placeholder="Your note..." class="w-full h-32 bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500"></textarea>
+                <button onclick="save('notes')" class="bg-emerald-600 hover:bg-emerald-700 px-8 py-3 rounded-xl font-bold transition">Save Note</button>
             </div>
-            <div id="notes-display" class="grid grid-cols-2 gap-4"></div>
+            <div id="notes-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </div>
+
     </main>
-</div>
 
 <script>
-    const SCRIPT_URL = "ඔබේ_අලුත්ම_URL_එක_මෙහි_යොදන්න";
-    const USER_EMAIL = "sahanpabasara2003@gmail.com"; // පරීක්ෂා කිරීම සඳහා
+    // මෙතැනට ඔබේ Web App URL එක දමන්න (3 වන පියවරෙන් ලැබුණු එක)
+    const SCRIPT_URL = "ඔබේ_අලුත්ම_URL_එක_මෙතැනට_දමන්න";
+    const USER_EMAIL = "sahanpabasara2003@gmail.com"; 
 
-    function showTab(id) {
+    function switchTab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.getElementById('tab-' + id).classList.add('active');
         fetchData();
     }
 
     async function fetchData() {
-        const res = await fetch(`${SCRIPT_URL}?email=${USER_EMAIL}`);
-        const data = await res.json();
-        
-        // Render Passwords
-        document.getElementById('password-display').innerHTML = data.passwords.map(p => `
-            <div class="glass p-5 rounded-xl relative group">
-                <button onclick="deleteItem('Passwords', ${p.id})" class="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" size="16"></i></button>
-                <h4 class="font-bold text-blue-400">${p.platform}</h4>
-                <p class="text-sm text-slate-400">${p.user}</p>
-                <p class="font-mono mt-2">••••••••</p>
-            </div>
-        `).join('');
+        try {
+            const res = await fetch(`${SCRIPT_URL}?email=${USER_EMAIL}`);
+            const data = await res.json();
+            
+            // Passwords Display
+            document.getElementById('password-list').innerHTML = data.passwords.map(p => `
+                <div class="glass p-6 rounded-2xl relative group border-l-4 border-blue-500">
+                    <button onclick="deleteRow('Passwords', ${p.id})" class="absolute top-4 right-4 text-red-500 hover:scale-110 transition"><i data-lucide="trash-2" size="18"></i></button>
+                    <h4 class="font-bold text-lg mb-1">${p.platform}</h4>
+                    <p class="text-sm text-slate-400 mb-3">${p.user}</p>
+                    <div class="bg-slate-900/50 p-2 rounded-lg font-mono text-blue-400">••••••••</div>
+                </div>
+            `).join('');
 
-        // Render Notes
-        document.getElementById('notes-display').innerHTML = data.notes.map(n => `
-            <div class="glass p-5 rounded-xl border-l-4 border-emerald-500">
-                <h4 class="font-bold">${n.title}</h4>
-                <p class="text-sm text-slate-300 mt-2">${n.content}</p>
-                <button onclick="deleteItem('Notes', ${n.id})" class="text-xs text-red-400 mt-4">Delete</button>
-            </div>
-        `).join('');
-        lucide.createIcons();
+            // Notes Display
+            document.getElementById('notes-list').innerHTML = data.notes.map(n => `
+                <div class="glass p-6 rounded-2xl border-l-4 border-emerald-500">
+                    <div class="flex justify-between mb-4">
+                        <h4 class="font-bold text-lg">${n.title}</h4>
+                        <button onclick="deleteRow('Notes', ${n.id})" class="text-red-400"><i data-lucide="trash-2" size="18"></i></button>
+                    </div>
+                    <p class="text-sm text-slate-300 leading-relaxed">${n.content}</p>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        } catch(e) { console.error("Data fetch error", e); }
     }
 
     async function save(type) {
@@ -90,26 +98,34 @@
             { p: document.getElementById('p-plat').value, u: document.getElementById('p-user').value, ps: document.getElementById('p-pass').value, url: "" } :
             { t: document.getElementById('n-title').value, c: document.getElementById('n-body').value, time: new Date().toLocaleDateString() };
 
+        if(!payload.p && !payload.t) return Swal.fire('Error', 'දත්ත පුරවන්න', 'error');
+
+        Swal.fire({ title: 'Saving...', didOpen: () => Swal.showLoading() });
+
         await fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({ action: 'save_data', email: USER_EMAIL, dataType: type, payload })
         });
+
         Swal.fire('Saved!', '', 'success');
-        setTimeout(fetchData, 2000);
+        fetchData();
     }
 
-    async function deleteItem(tab, id) {
-        if(!confirm("මකා දැමීමට අවශ්‍යද?")) return;
+    async function deleteRow(tab, rowId) {
+        if(!confirm("මෙම දත්තය මැකීමට අවශ්‍යද?")) return;
         await fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
-            body: JSON.stringify({ action: 'delete_data', tab: tab, rowId: id })
+            body: JSON.stringify({ action: 'delete_data', tab: tab, rowId: rowId })
         });
         fetchData();
     }
 
-    fetchData(); // මුලින්ම දත්ත Load කිරීමට
+    function logout() { location.reload(); }
+    
+    // Start
+    fetchData();
     lucide.createIcons();
 </script>
 </body>
